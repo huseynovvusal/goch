@@ -1,0 +1,59 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.out
+
+# Build directories
+/bin/
+/build/
+/dist/
+/tmp/
+/_*
+
+# Package objects
+/pkg/
+
+# Dependency directories (uncomment if you vendor deps)
+/vendor/
+
+# Go workspace
+go.work
+go.work.sum
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE / editor files
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# Logs and runtime files
+*.log
+*.pid
+*.seed
+
+# Test cache and profiling
+testdata/
+prof.out
+*.prof
+
+# Misc
+*.swp
+*.tmp
+*.backup
+.cache/
