@@ -57,6 +57,7 @@ func ListenForPresence(port int) {
 		}
 		name := string(buf[:n])
 		user := User{Name: name, IP: remoteAddr.IP.String()}
+		fmt.Printf("Discovered user: %s at %s\n", user.Name, user.IP)
 		onlineUsers = append(onlineUsers, user)
 	}
 }
