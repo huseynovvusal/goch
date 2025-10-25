@@ -22,7 +22,7 @@ func GetOnlineUsers() []User {
 
 func BroadcastPresence(name string, port int) {
 	addr := net.UDPAddr{
-		IP:   net.IPv4bcast,
+		IP:   net.ParseIP("192.168.100.255"),
 		Port: port,
 	}
 
@@ -31,6 +31,7 @@ func BroadcastPresence(name string, port int) {
 
 	for {
 		conn.Write([]byte(name))
+		fmt.Println("Broadcasted presence as", name)
 		time.Sleep(5 * time.Second)
 	}
 }
