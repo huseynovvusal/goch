@@ -11,10 +11,7 @@ type User struct {
 	IP   string
 }
 
-var onlineUsers = []User{
-	// Placeholder for demo
-	{Name: "John Doe", IP: "192.168.10.10"},
-}
+var onlineUsers = []User{}
 
 func GetOnlineUsers() []User {
 	return onlineUsers
@@ -22,7 +19,7 @@ func GetOnlineUsers() []User {
 
 func BroadcastPresence(name string, port int) {
 	addr := net.UDPAddr{
-		IP:   net.ParseIP("192.168.100.255"),
+		IP:   net.IPv4bcast,
 		Port: port,
 	}
 
@@ -31,7 +28,7 @@ func BroadcastPresence(name string, port int) {
 
 	for {
 		conn.Write([]byte(name))
-		fmt.Println("Broadcasted presence as", name)
+		// fmt.Println("Broadcasted presence as", name)
 		time.Sleep(5 * time.Second)
 	}
 }
@@ -57,7 +54,21 @@ func ListenForPresence(port int) {
 		}
 		name := string(buf[:n])
 		user := User{Name: name, IP: remoteAddr.IP.String()}
-		fmt.Printf("Discovered user: %s at %s\n", user.Name, user.IP)
-		onlineUsers = append(onlineUsers, user)
+
+		if !isUserInList(user) {
+			onlineUsers = append(onlineUsers, user)
+		}
+
+		fmt.Printf("Discovered user: %s at %s; online users: %v\n", user.Name, user.IP, onlineUsers)
 	}
+}
+
+func isUserInList(user User) bool {
+	for _, u := range onlineUsers {
+		if u.IP == user.IP {
+			return true
+		}
+	}
+
+	return false
 }
