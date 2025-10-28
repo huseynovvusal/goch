@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/huseynovvusal/goch/internal/discovery"
+	"github.com/huseynovvusal/goch/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -15,8 +17,11 @@ var rootCmd = &cobra.Command{
 over a local area network (LAN). It supports multiple users, private messaging, and
 various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Default action when no subcommands are provided
-		fmt.Println("Welcome to goch! Use 'goch --help' to see available commands.")
+		p := tea.NewProgram(tui.NewMainModel())
+		if err := p.Start(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error running program: %v\n", err)
+			os.Exit(1)
+		}
 
 		var name string
 		fmt.Print("Enter your name: ")
