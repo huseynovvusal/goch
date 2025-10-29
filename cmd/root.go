@@ -18,19 +18,15 @@ over a local area network (LAN). It supports multiple users, private messaging, 
 various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		p := tea.NewProgram(tui.NewMainModel())
-		if err := p.Start(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error running program: %v\n", err)
+		_, err := p.Run()
+		if err != nil {
+			fmt.Println("Error running TUI:", err)
 			os.Exit(1)
 		}
 
-		var name string
-		fmt.Print("Enter your name: ")
-		fmt.Scanln(&name)
-		fmt.Println("Broadcasting your presence on the network...")
-
 		go discovery.ListenForPresence(8787)
 
-		discovery.BroadcastPresence(name, 8787)
+		// discovery.BroadcastPresence(name, 8787)
 	},
 }
 
