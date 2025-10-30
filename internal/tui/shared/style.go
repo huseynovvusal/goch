@@ -13,8 +13,33 @@ var (
 
 var (
 	HeaderStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(AccentColor).
-		Background(BaseBgColor).
-		Padding(1, 2)
+			Bold(true).
+			Foreground(AccentColor).
+			Background(BaseBgColor).
+			Padding(1, 2).
+			MarginBottom(1)
+
+	InfoStyle = lipgloss.NewStyle().
+			Foreground(BaseFgColor).
+			Background(BaseBgColor).
+			Padding(0, 1)
+
+	ErrorStyle = lipgloss.NewStyle().
+			Foreground(ErrorColor).
+			Background(BaseBgColor).
+			Bold(true).
+			Padding(0, 1)
+
+	PromptStyle = lipgloss.NewStyle().
+			Foreground(HighlightColor).
+			Background(BaseBgColor).
+			Bold(true).
+			Padding(0, 1)
+
+	BodyStyle = lipgloss.NewStyle().
+			Foreground(BaseFgColor)
+
+	FooterStyle = lipgloss.NewStyle().
+			Foreground(AccentColor).
+			MarginTop(1)
 )

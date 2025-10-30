@@ -30,10 +30,16 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) View() string {
 	if m.submitted {
-		return shared.HeaderStyle.Render("Hello, " + m.name + "!\nPress q or ctrl+c to quit.")
+		return shared.HeaderStyle.Render("Hello, "+m.name+"!") +
+			"\n\n" +
+			shared.FooterStyle.Render("Press q or ctrl+c to quit.")
 	}
-	return shared.HeaderStyle.Render("Goch - LAN Chat Application\n\n" + m.
-		nameInput.View() + "\n(Press Enter to submit)")
+
+	return shared.HeaderStyle.Render("Goch - LAN Chat Application") +
+		"\n\n" +
+		shared.BodyStyle.Render(m.nameInput.View()) +
+		"\n\n" +
+		shared.FooterStyle.Render("(Press Enter to submit)")
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
