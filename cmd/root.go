@@ -17,16 +17,21 @@ var rootCmd = &cobra.Command{
 over a local area network (LAN). It supports multiple users, private messaging, and
 various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		go discovery.ListenForPresence(8787)
+
 		p := tea.NewProgram(tui.NewMainModel())
-		_, err := p.Run()
+		mainModel, err := p.Run()
 		if err != nil {
 			fmt.Println("Error running TUI:", err)
 			os.Exit(1)
 		}
 
-		go discovery.ListenForPresence(8787)
+		_, ok := mainModel.(tui.Model)
+		if !ok {
+			fmt.Println("Error asserting TUI model")
+			os.Exit(1)
+		}
 
-		// discovery.BroadcastPresence(name, 8787)
 	},
 }
 

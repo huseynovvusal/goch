@@ -1,16 +1,24 @@
 package tui
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/huseynovvusal/goch/internal/config"
+	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui/shared"
 )
 
 type Model struct {
-	nameInput textinput.Model
-	name      string
-	submitted bool
+	nameInput   textinput.Model
+	name        string
+	submitted   bool
+	onlineUsers []discovery.User
 }
+
+type UpdateUsersMsg []discovery.User
 
 func NewMainModel() Model {
 	ti := textinput.New()
@@ -30,9 +38,21 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) View() string {
 	if m.submitted {
-		return shared.HeaderStyle.Render("Hello, "+m.name+"!") +
-			"\n\n" +
-			shared.FooterStyle.Render("Press q or ctrl+c to quit.")
+		header := shared.HeaderStyle.Render("Hello, " + m.name + "!")
+		footer := shared.FooterStyle.Render("Press q or ctrl+c to quit.")
+
+		var body string
+		if len(m.onlineUsers) > 0 {
+			users := "Online users:\n"
+			for _, user := range m.onlineUsers {
+				users += fmt.Sprintf("- %s (%s)\n", user.Name, user.IP)
+			}
+			body = shared.BodyStyle.Render(users)
+		} else {
+			body = shared.BodyStyle.Render("No online users found.")
+		}
+
+		return header + "\n\n" + body + "\n\n" + footer
 	}
 
 	return shared.HeaderStyle.Render("Goch - LAN Chat Application") +
@@ -52,9 +72,24 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !m.submitted {
 				m.name = m.nameInput.Value()
 				m.submitted = true
-				return m, nil
+
+				go discovery.BroadcastPresence(m.name, 8787)
+
+				go func() {
+					time.Sleep(500 * time.Millisecond) // Wait for initial presence broadcasts
+					m.onlineUsers = discovery.GetOnlineUsers()
+				}()
+
+				return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
+					return UpdateUsersMsg(discovery.GetOnlineUsers())
+				})
 			}
 		}
+	case UpdateUsersMsg:
+		m.onlineUsers = msg.(UpdateUsersMsg)
+		return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
+			return UpdateUsersMsg(discovery.GetOnlineUsers())
+		})
 	}
 
 	if !m.submitted {
@@ -64,4 +99,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m Model) GetName() string {
+	return m.name
 }

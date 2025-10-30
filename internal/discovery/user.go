@@ -29,7 +29,7 @@ func BroadcastPresence(name string, port int) {
 	for {
 		conn.Write([]byte(name))
 		// fmt.Println("Broadcasted presence as", name)
-		time.Sleep(5 * time.Second)
+		time.Sleep(3 * time.Second)
 	}
 }
 
@@ -59,7 +59,7 @@ func ListenForPresence(port int) {
 			onlineUsers = append(onlineUsers, user)
 		}
 
-		fmt.Printf("Discovered user: %s at %s; online users: %v\n", user.Name, user.IP, onlineUsers)
+		// fmt.Printf("Discovered user: %s at %s; online users: %v\n", user.Name, user.IP, onlineUsers)
 	}
 }
 
