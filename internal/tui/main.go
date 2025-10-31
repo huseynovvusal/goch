@@ -70,7 +70,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "enter":
 			if !m.submitted {
-				m.name = m.nameInput.Value()
+				name := m.nameInput.Value()
+
+				if name == "" || len(name) > config.MAX_USERNAME_LENGTH || len(name) < config.MIN_USERNAME_LENGTH {
+					return m, nil
+				}
+
+				m.name = name
 				m.submitted = true
 
 				go discovery.BroadcastPresence(m.name, 8787)
