@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -43,9 +42,9 @@ func (m Model) View() string {
 
 		var body string
 		if len(m.onlineUsers) > 0 {
-			users := "Online users:\n"
+			users := shared.SubtitleStyle.Render("Online users:") + "\n"
 			for _, user := range m.onlineUsers {
-				users += fmt.Sprintf("- %s (%s)\n", user.Name, user.IP)
+				users += shared.ListSelectedTextStyle.Render("\t- "+user.Name+" ("+user.IP+")") + "\n"
 			}
 			body = shared.BodyStyle.Render(users)
 		} else {
