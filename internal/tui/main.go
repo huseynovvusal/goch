@@ -11,13 +11,14 @@ import (
 )
 
 type Model struct {
-	nameInput   textinput.Model
-	name        string
-	submitted   bool
-	onlineUsers []discovery.User
+	nameInput     textinput.Model
+	name          string
+	nameSubmitted bool
+	onlineUsers   []discovery.NetworkUser
+	selectedUser  *discovery.NetworkUser
 }
 
-type UpdateUsersMsg []discovery.User
+type UpdateUsersMsg []discovery.NetworkUser
 
 func NewMainModel() Model {
 	ti := textinput.New()
@@ -36,16 +37,26 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) View() string {
-	if m.submitted {
+	if m.nameSubmitted {
 		header := shared.HeaderStyle.Render("Hello, " + m.name + "!")
 		footer := shared.FooterStyle.Render("Press q or ctrl+c to quit.")
 
 		var body string
 		if len(m.onlineUsers) > 0 {
 			users := shared.SubtitleStyle.Render("Online users:") + "\n"
+
 			for _, user := range m.onlineUsers {
-				users += shared.ListSelectedTextStyle.Render("\t- "+user.Name+" ("+user.IP+")") + "\n"
+				prefix := "  "
+				style := shared.ListTextStyle
+
+				if m.selectedUser != nil && m.selectedUser.IP == user.IP {
+					prefix = "> "
+					style = shared.ListSelectedTextStyle
+				}
+
+				users += style.Render(prefix+user.Name+" ("+user.IP+")") + "\n"
 			}
+
 			body = shared.BodyStyle.Render(users)
 		} else {
 			body = shared.BodyStyle.Render("No online users found.")
@@ -68,36 +79,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "enter":
-			if !m.submitted {
+			if !m.nameSubmitted {
 				name := m.nameInput.Value()
 
-				if name == "" || len(name) > config.MAX_USERNAME_LENGTH || len(name) < config.MIN_USERNAME_LENGTH {
-					return m, nil
-				}
-
 				m.name = name
-				m.submitted = true
+				m.nameSubmitted = true
 
 				go discovery.BroadcastPresence(m.name, 8787)
 
-				go func() {
-					time.Sleep(500 * time.Millisecond) // Wait for initial presence broadcasts
-					m.onlineUsers = discovery.GetOnlineUsers()
-				}()
-
 				return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
-					return UpdateUsersMsg(discovery.GetOnlineUsers())
+					users := discovery.GetOnlineUsers()
+
+					return UpdateUsersMsg(users)
 				})
 			}
+
 		}
 	case UpdateUsersMsg:
 		m.onlineUsers = msg.(UpdateUsersMsg)
+		if m.selectedUser == nil && len(m.onlineUsers) > 0 {
+			m.selectedUser = &m.onlineUsers[0]
+		}
+
 		return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 			return UpdateUsersMsg(discovery.GetOnlineUsers())
 		})
 	}
 
-	if !m.submitted {
+	if !m.nameSubmitted {
 		var cmd tea.Cmd
 		m.nameInput, cmd = m.nameInput.Update(msg)
 		return m, cmd
