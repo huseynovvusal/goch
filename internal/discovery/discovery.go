@@ -19,7 +19,8 @@ func GetOnlineUsers() []NetworkUser {
 
 func BroadcastPresence(name string, port int) {
 	addr := net.UDPAddr{
-		IP:   net.IPv4bcast,
+		// IP:   net.IPv4bcast,
+		IP:   net.IPv4(192, 168, 100, 255), // Use your actual subnet broadcast address
 		Port: port,
 	}
 

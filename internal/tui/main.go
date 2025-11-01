@@ -11,11 +11,11 @@ import (
 )
 
 type Model struct {
-	nameInput     textinput.Model
-	name          string
-	nameSubmitted bool
-	onlineUsers   []discovery.NetworkUser
-	selectedUser  *discovery.NetworkUser
+	nameInput         textinput.Model
+	name              string
+	nameSubmitted     bool
+	onlineUsers       []discovery.NetworkUser
+	selectedUserIndex int
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
@@ -46,10 +46,10 @@ func (m Model) View() string {
 			users := shared.SubtitleStyle.Render("Online users:") + "\n"
 
 			for _, user := range m.onlineUsers {
-				prefix := "  "
+				prefix := " "
 				style := shared.ListTextStyle
 
-				if m.selectedUser != nil && m.selectedUser.IP == user.IP {
+				if m.selectedUserIndex < len(m.onlineUsers) && user == m.onlineUsers[m.selectedUserIndex] {
 					prefix = "> "
 					style = shared.ListSelectedTextStyle
 				}
@@ -78,6 +78,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.(tea.KeyMsg).String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		case "up", "k":
+			if m.nameSubmitted && len(m.onlineUsers) > 0 {
+				if m.selectedUserIndex > 0 {
+					m.selectedUserIndex--
+				}
+			}
+			return m, nil
+		case "down", "j":
+			if m.nameSubmitted && len(m.onlineUsers) > 0 {
+				if m.selectedUserIndex < len(m.onlineUsers)-1 {
+					m.selectedUserIndex++
+				}
+			}
+			return m, nil
 		case "enter":
 			if !m.nameSubmitted {
 				name := m.nameInput.Value()
@@ -97,9 +111,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case UpdateUsersMsg:
 		m.onlineUsers = msg.(UpdateUsersMsg)
-		if m.selectedUser == nil && len(m.onlineUsers) > 0 {
-			m.selectedUser = &m.onlineUsers[0]
-		}
 
 		return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 			return UpdateUsersMsg(discovery.GetOnlineUsers())
