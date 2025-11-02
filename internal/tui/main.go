@@ -78,14 +78,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.(tea.KeyMsg).String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-		case "up", "k":
+		case "up":
 			if m.nameSubmitted && len(m.onlineUsers) > 0 {
 				if m.selectedUserIndex > 0 {
 					m.selectedUserIndex--
 				}
 			}
 			return m, nil
-		case "down", "j":
+		case "down":
 			if m.nameSubmitted && len(m.onlineUsers) > 0 {
 				if m.selectedUserIndex < len(m.onlineUsers)-1 {
 					m.selectedUserIndex++
