@@ -15,6 +15,12 @@ type NetworkUser struct {
 
 var onlineUsers = []NetworkUser{}
 
+var selfUser NetworkUser
+
+func GetSelfUser() NetworkUser {
+	return selfUser
+}
+
 func GetOnlineUsers() []NetworkUser {
 	return onlineUsers
 }
@@ -29,9 +35,15 @@ func BroadcastPresence(name string, port int) {
 	conn, _ := net.DialUDP("udp", nil, addr)
 	defer conn.Close()
 
+	localIp := conn.LocalAddr().(*net.UDPAddr).IP.String()
+
+	selfUser = NetworkUser{
+		Name: name,
+		IP:   localIp,
+	}
+
 	for {
 		conn.Write([]byte(name))
-		// fmt.Println("Broadcasted presence as", name)
 		time.Sleep(3 * time.Second)
 	}
 }
@@ -55,14 +67,13 @@ func ListenForPresence(port int) {
 		if err != nil {
 			continue
 		}
+
 		name := string(buf[:n])
 		user := NetworkUser{Name: name, IP: remoteAddr.IP.String()}
 
-		if !isUserInList(user) {
+		if !isUserInList(user) && user.IP != selfUser.IP {
 			onlineUsers = append(onlineUsers, user)
 		}
-
-		// fmt.Printf("Discovered user: %s at %s; online users: %v\n", user.Name, user.IP, onlineUsers)
 	}
 }
 

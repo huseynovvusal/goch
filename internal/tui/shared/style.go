@@ -40,8 +40,7 @@ var (
 			Padding(0, 1)
 
 	InfoStyle = lipgloss.NewStyle().
-			Foreground(BaseFgColor).
-			Padding(0, 1)
+			Foreground(BaseFgColor)
 
 	ErrorStyle = lipgloss.NewStyle().
 			Foreground(ErrorColor).

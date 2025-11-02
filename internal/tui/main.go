@@ -38,7 +38,13 @@ func (m Model) Init() tea.Cmd {
 
 func (m Model) View() string {
 	if m.nameSubmitted {
-		header := shared.HeaderStyle.Render("Hello, " + m.name + "!")
+		self := discovery.GetSelfUser()
+		selfInfo := ""
+		if self.Name != "" && self.IP != "" {
+			selfInfo = shared.InfoStyle.Render("You: " + self.Name + " (" + self.IP + ")")
+		}
+
+		header := shared.HeaderStyle.Render("Hello, " + m.name + "!" + "\n" + selfInfo)
 		footer := shared.FooterStyle.Render("Press q or ctrl+c to quit.")
 
 		var body string
