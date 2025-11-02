@@ -73,4 +73,12 @@ var (
 			Padding(1, 2).
 			Margin(1, 0).
 			Foreground(BaseFgColor)
+
+	MessageFromStyle = lipgloss.NewStyle().
+				Foreground(AccentColor).
+				Bold(true)
+
+	MessageContentStyle = lipgloss.NewStyle().
+				Foreground(BaseFgColor).
+				PaddingLeft(1)
 )

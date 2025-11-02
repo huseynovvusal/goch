@@ -10,25 +10,51 @@ import (
 	"github.com/huseynovvusal/goch/internal/tui/shared"
 )
 
+type state int
+
+const (
+	stateEnterName state = iota
+	stateShowUsers
+	stateChat
+)
+
 type Model struct {
-	nameInput         textinput.Model
-	name              string
-	nameSubmitted     bool
+	state state
+
+	nameInput     textinput.Model
+	name          string
+	nameSubmitted bool
+
 	onlineUsers       []discovery.NetworkUser
 	selectedUserIndex int
+
+	messageInput textinput.Model
+	messages     []Message
+}
+
+type Message struct {
+	Content string
+	From    discovery.NetworkUser
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
 
 func NewMainModel() Model {
-	ti := textinput.New()
-	ti.Placeholder = "Enter your name"
-	ti.Focus()
-	ti.CharLimit = 32
-	ti.Width = 20
+	nameInput := textinput.New()
+	nameInput.Placeholder = "Enter your name"
+	nameInput.Focus()
+	nameInput.CharLimit = 32
+	nameInput.Width = 20
+
+	messageInput := textinput.New()
+	messageInput.Placeholder = "Type your message"
+	messageInput.CharLimit = 256
+	messageInput.Width = 50
 
 	return Model{
-		nameInput: ti,
+		nameInput:    nameInput,
+		messageInput: messageInput,
+		state:        stateEnterName,
 	}
 }
 
@@ -37,81 +63,125 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) View() string {
-	if m.nameSubmitted {
-		self := discovery.GetSelfUser()
-		selfInfo := ""
-		if self.Name != "" && self.IP != "" {
-			selfInfo = shared.InfoStyle.Render("You: " + self.Name + " (" + self.IP + ")")
-		}
-
-		header := shared.HeaderStyle.Render("Hello, " + m.name + "!" + "\n" + selfInfo)
-		footer := shared.FooterStyle.Render("Press q or ctrl+c to quit.")
-
-		var body string
-		if len(m.onlineUsers) > 0 {
-			users := shared.SubtitleStyle.Render("Online users:") + "\n"
-
-			for _, user := range m.onlineUsers {
-				prefix := " "
-				style := shared.ListTextStyle
-
-				if m.selectedUserIndex < len(m.onlineUsers) && user == m.onlineUsers[m.selectedUserIndex] {
-					prefix = "> "
-					style = shared.ListSelectedTextStyle
-				}
-
-				users += style.Render(prefix+user.Name+" ("+user.IP+")") + "\n"
-			}
-
-			body = shared.BodyStyle.Render(users)
-		} else {
-			body = shared.BodyStyle.Render("No online users found.")
-		}
-
-		return header + "\n\n" + body + "\n\n" + footer
+	if m.state == stateEnterName {
+		return shared.HeaderStyle.Render("Goch - LAN Chat Application") +
+			"\n\n" +
+			shared.BodyStyle.Render(m.nameInput.View()) +
+			"\n\n" +
+			shared.FooterStyle.Render("(Press Enter to submit)")
 	}
 
-	return shared.HeaderStyle.Render("Goch - LAN Chat Application") +
-		"\n\n" +
-		shared.BodyStyle.Render(m.nameInput.View()) +
-		"\n\n" +
-		shared.FooterStyle.Render("(Press Enter to submit)")
+	self := discovery.GetSelfUser()
+	selfInfo := ""
+	if self.Name != "" && self.IP != "" {
+		selfInfo = shared.InfoStyle.Render("You: " + self.Name + " (" + self.IP + ")")
+	}
+
+	header := shared.HeaderStyle.Render("Hello, " + m.name + "!" + "\n" + selfInfo)
+	footer := shared.FooterStyle.Render("Press ctrl+c to quit.")
+
+	var body string
+	if len(m.onlineUsers) > 0 {
+		users := shared.SubtitleStyle.Render("Online users:") + "\n"
+
+		for _, user := range m.onlineUsers {
+			prefix := " "
+			style := shared.ListTextStyle
+
+			if m.state == stateShowUsers && m.onlineUsers[m.selectedUserIndex] == user {
+				prefix = "> "
+				style = shared.ListSelectedTextStyle
+			} else if m.state == stateChat && m.onlineUsers[m.selectedUserIndex] == user {
+				prefix = "* "
+				style = shared.ListSelectedTextStyle
+			}
+
+			users += style.Render(prefix+user.Name+" ("+user.IP+")") + "\n"
+		}
+
+		body = shared.BodyStyle.Render(users)
+	} else {
+		body = shared.BodyStyle.Render("No online users found.")
+	}
+
+	if m.state == stateChat {
+		body += "\n" + shared.SubtitleStyle.Render("Chatting with "+m.onlineUsers[m.selectedUserIndex].Name+":") + "\n"
+		if len(m.messages) == 0 {
+			body += shared.BodyStyle.Render("No messages yet.") + "\n"
+		} else {
+			for _, msg := range m.messages {
+				body += shared.MessageFromStyle.Render(msg.From.Name+": ") + shared.MessageContentStyle.Render(msg.Content) + "\n"
+			}
+		}
+
+		body += "\n" + m.messageInput.View()
+	}
+
+	return header + "\n\n" + body + "\n\n" + footer
+
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg.(type) {
 	case tea.KeyMsg:
 		switch msg.(tea.KeyMsg).String() {
-		case "ctrl+c", "q":
+		case "ctrl+c":
 			return m, tea.Quit
 		case "up":
-			if m.nameSubmitted && len(m.onlineUsers) > 0 {
-				if m.selectedUserIndex > 0 {
-					m.selectedUserIndex--
+			if m.state == stateShowUsers {
+				if len(m.onlineUsers) > 0 {
+					if m.selectedUserIndex > 0 {
+						m.selectedUserIndex--
+					}
 				}
 			}
 			return m, nil
 		case "down":
-			if m.nameSubmitted && len(m.onlineUsers) > 0 {
-				if m.selectedUserIndex < len(m.onlineUsers)-1 {
-					m.selectedUserIndex++
+			if m.state == stateShowUsers {
+				if len(m.onlineUsers) > 0 {
+					if m.selectedUserIndex < len(m.onlineUsers)-1 {
+						m.selectedUserIndex++
+					}
 				}
 			}
 			return m, nil
 		case "enter":
-			if !m.nameSubmitted {
-				name := m.nameInput.Value()
 
-				m.name = name
-				m.nameSubmitted = true
+			switch m.state {
+			case stateEnterName:
+				if !m.nameSubmitted {
+					name := m.nameInput.Value()
 
-				go discovery.BroadcastPresence(m.name, 8787)
+					m.name = name
+					m.nameSubmitted = true
+					m.state = stateShowUsers
 
-				return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
-					users := discovery.GetOnlineUsers()
+					go discovery.BroadcastPresence(m.name, 8787)
 
-					return UpdateUsersMsg(users)
-				})
+					return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
+						users := discovery.GetOnlineUsers()
+
+						return UpdateUsersMsg(users)
+					})
+				}
+
+			case stateShowUsers:
+				if len(m.onlineUsers) > 0 {
+					m.state = stateChat
+					m.messageInput.Focus()
+				}
+
+			case stateChat:
+				messageContent := m.messageInput.Value()
+				if messageContent != "" {
+					message := Message{
+						Content: messageContent,
+						From:    discovery.GetSelfUser(),
+					}
+					m.messages = append(m.messages, message)
+					m.messageInput.SetValue("")
+
+				}
 			}
 
 		}
@@ -126,6 +196,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !m.nameSubmitted {
 		var cmd tea.Cmd
 		m.nameInput, cmd = m.nameInput.Update(msg)
+		return m, cmd
+	}
+
+	if m.state == stateChat {
+		var cmd tea.Cmd
+		m.messageInput, cmd = m.messageInput.Update(msg)
 		return m, cmd
 	}
 
