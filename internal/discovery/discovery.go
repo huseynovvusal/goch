@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"time"
+
+	"github.com/huseynovvusal/goch/internal/utils/network"
 )
 
 type NetworkUser struct {
@@ -18,13 +20,13 @@ func GetOnlineUsers() []NetworkUser {
 }
 
 func BroadcastPresence(name string, port int) {
-	addr := net.UDPAddr{
-		// IP:   net.IPv4bcast,
-		IP:   net.IPv4(192, 168, 100, 255), // Use your actual subnet broadcast address
-		Port: port,
+	addr, err := network.GetBroadcastAddr(port)
+	if err != nil {
+		fmt.Println("Error getting broadcast address:", err)
+		return
 	}
 
-	conn, _ := net.DialUDP("udp", nil, &addr)
+	conn, _ := net.DialUDP("udp", nil, addr)
 	defer conn.Close()
 
 	for {
