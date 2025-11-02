@@ -39,7 +39,7 @@ func SendChatMessage(content string, to discovery.NetworkUser, from discovery.Ne
 	return err
 }
 
-func ListenForChatMessages(messages chan<- []NetworkMessage) {
+func ListenForChatMessages(messages chan<- NetworkMessage) {
 	addr := net.UDPAddr{
 		IP:   net.IPv4zero,
 		Port: config.CHAT_PORT,
@@ -63,7 +63,7 @@ func ListenForChatMessages(messages chan<- []NetworkMessage) {
 			continue
 		}
 
-		messages <- []NetworkMessage{message}
+		messages <- message
 	}
 
 }

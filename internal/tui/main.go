@@ -29,13 +29,14 @@ type Model struct {
 	onlineUsers       []discovery.NetworkUser
 	selectedUserIndex int
 
-	messageInput textinput.Model
-	chatMessages chan chat.NetworkMessage
+	messageInput     textinput.Model
+	chatMessages     []chat.NetworkMessage
+	chatMessagesChan chan chat.NetworkMessage
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
 
-func NewMainModel(chatMessages chan chat.NetworkMessage) Model {
+func NewMainModel(chatMessagesChan chan chat.NetworkMessage) Model {
 	nameInput := textinput.New()
 	nameInput.Placeholder = "Enter your name"
 	nameInput.Focus()
@@ -48,10 +49,11 @@ func NewMainModel(chatMessages chan chat.NetworkMessage) Model {
 	messageInput.Width = 50
 
 	return Model{
-		nameInput:    nameInput,
-		messageInput: messageInput,
-		state:        stateEnterName,
-		chatMessages: chatMessages,
+		nameInput:        nameInput,
+		messageInput:     messageInput,
+		state:            stateEnterName,
+		chatMessages:     []chat.NetworkMessage{},
+		chatMessagesChan: chatMessagesChan,
 	}
 }
 
@@ -119,6 +121,12 @@ func (m Model) View() string {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	select {
+	case msg := <-m.chatMessagesChan:
+		m.chatMessages = append(m.chatMessages, msg)
+	default:
+	}
+
 	switch msg.(type) {
 	case tea.KeyMsg:
 		switch msg.(tea.KeyMsg).String() {
@@ -171,10 +179,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case stateChat:
 				messageContent := m.messageInput.Value()
 				if messageContent != "" {
+					toUser := m.onlineUsers[m.selectedUserIndex]
+					fromUser := discovery.GetSelfUser()
+					chat.SendChatMessage(messageContent, toUser, fromUser)
+
 					message := chat.NetworkMessage{
 						Content: messageContent,
 						From:    discovery.GetSelfUser(),
 					}
+
 					m.chatMessages = append(m.chatMessages, message)
 					m.messageInput.SetValue("")
 

@@ -20,7 +20,7 @@ various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		go discovery.ListenForPresence(8787)
 
-		chatMessages := make(chan []chat.NetworkMessage)
+		chatMessages := make(chan chat.NetworkMessage)
 		go chat.ListenForChatMessages(chatMessages)
 
 		p := tea.NewProgram(tui.NewMainModel(chatMessages))
