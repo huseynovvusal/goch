@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/huseynovvusal/goch/internal/chat"
 	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui/shared"
@@ -29,17 +30,12 @@ type Model struct {
 	selectedUserIndex int
 
 	messageInput textinput.Model
-	messages     []Message
-}
-
-type Message struct {
-	Content string
-	From    discovery.NetworkUser
+	chatMessages chan chat.NetworkMessage
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
 
-func NewMainModel() Model {
+func NewMainModel(chatMessages chan chat.NetworkMessage) Model {
 	nameInput := textinput.New()
 	nameInput.Placeholder = "Enter your name"
 	nameInput.Focus()
@@ -55,6 +51,7 @@ func NewMainModel() Model {
 		nameInput:    nameInput,
 		messageInput: messageInput,
 		state:        stateEnterName,
+		chatMessages: chatMessages,
 	}
 }
 
@@ -106,10 +103,10 @@ func (m Model) View() string {
 
 	if m.state == stateChat {
 		body += "\n" + shared.SubtitleStyle.Render("Chatting with "+m.onlineUsers[m.selectedUserIndex].Name+":") + "\n"
-		if len(m.messages) == 0 {
+		if len(m.chatMessages) == 0 {
 			body += shared.BodyStyle.Render("No messages yet.") + "\n"
 		} else {
-			for _, msg := range m.messages {
+			for _, msg := range m.chatMessages {
 				body += shared.MessageFromStyle.Render(msg.From.Name+": ") + shared.MessageContentStyle.Render(msg.Content) + "\n"
 			}
 		}
@@ -174,11 +171,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case stateChat:
 				messageContent := m.messageInput.Value()
 				if messageContent != "" {
-					message := Message{
+					message := chat.NetworkMessage{
 						Content: messageContent,
 						From:    discovery.GetSelfUser(),
 					}
-					m.messages = append(m.messages, message)
+					m.chatMessages = append(m.chatMessages, message)
 					m.messageInput.SetValue("")
 
 				}

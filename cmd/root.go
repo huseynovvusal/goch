@@ -5,6 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/huseynovvusal/goch/internal/chat"
 	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui"
 	"github.com/spf13/cobra"
@@ -19,7 +20,10 @@ various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		go discovery.ListenForPresence(8787)
 
-		p := tea.NewProgram(tui.NewMainModel())
+		chatMessages := make(chan []chat.NetworkMessage)
+		go chat.ListenForChatMessages(chatMessages)
+
+		p := tea.NewProgram(tui.NewMainModel(chatMessages))
 		mainModel, err := p.Run()
 		if err != nil {
 			fmt.Println("Error running TUI:", err)
