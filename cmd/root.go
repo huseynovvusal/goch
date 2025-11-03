@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/huseynovvusal/goch/internal/chat"
+	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui"
 	"github.com/spf13/cobra"
@@ -18,7 +19,7 @@ var rootCmd = &cobra.Command{
 over a local area network (LAN). It supports multiple users, private messaging, and
 various customization options.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		go discovery.ListenForPresence(8787)
+		go discovery.ListenForPresence(config.BROADCAST_PORT)
 
 		chatMessages := make(chan chat.NetworkMessage)
 		go chat.ListenForChatMessages(chatMessages)

@@ -9,6 +9,7 @@ import (
 	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui/shared"
+	"github.com/huseynovvusal/goch/internal/validation"
 )
 
 type state int
@@ -157,11 +158,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if !m.nameSubmitted {
 					name := m.nameInput.Value()
 
+					if validation.IsValidUserName(name) == false {
+						return m, nil
+					}
+
 					m.name = name
 					m.nameSubmitted = true
 					m.state = stateShowUsers
 
-					go discovery.BroadcastPresence(m.name, 8787)
+					go discovery.BroadcastPresence(m.name, config.BROADCAST_PORT)
 
 					return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 						users := discovery.GetOnlineUsers()
