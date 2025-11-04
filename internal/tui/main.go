@@ -9,6 +9,7 @@ import (
 	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui/shared"
+	"github.com/huseynovvusal/goch/internal/validation"
 )
 
 type state int
@@ -29,13 +30,14 @@ type Model struct {
 	onlineUsers       []discovery.NetworkUser
 	selectedUserIndex int
 
-	messageInput textinput.Model
-	chatMessages chan chat.NetworkMessage
+	messageInput     textinput.Model
+	chatMessages     []chat.NetworkMessage
+	chatMessagesChan chan chat.NetworkMessage
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
 
-func NewMainModel(chatMessages chan chat.NetworkMessage) Model {
+func NewMainModel(chatMessagesChan chan chat.NetworkMessage) Model {
 	nameInput := textinput.New()
 	nameInput.Placeholder = "Enter your name"
 	nameInput.Focus()
@@ -48,10 +50,11 @@ func NewMainModel(chatMessages chan chat.NetworkMessage) Model {
 	messageInput.Width = 50
 
 	return Model{
-		nameInput:    nameInput,
-		messageInput: messageInput,
-		state:        stateEnterName,
-		chatMessages: chatMessages,
+		nameInput:        nameInput,
+		messageInput:     messageInput,
+		state:            stateEnterName,
+		chatMessages:     []chat.NetworkMessage{},
+		chatMessagesChan: chatMessagesChan,
 	}
 }
 
@@ -119,6 +122,12 @@ func (m Model) View() string {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	select {
+	case msg := <-m.chatMessagesChan:
+		m.chatMessages = append(m.chatMessages, msg)
+	default:
+	}
+
 	switch msg.(type) {
 	case tea.KeyMsg:
 		switch msg.(tea.KeyMsg).String() {
@@ -149,11 +158,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if !m.nameSubmitted {
 					name := m.nameInput.Value()
 
+					if validation.IsValidUserName(name) == false {
+						return m, nil
+					}
+
 					m.name = name
 					m.nameSubmitted = true
 					m.state = stateShowUsers
 
-					go discovery.BroadcastPresence(m.name, 8787)
+					go discovery.BroadcastPresence(m.name, config.BROADCAST_PORT)
 
 					return m, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 						users := discovery.GetOnlineUsers()
@@ -171,10 +184,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case stateChat:
 				messageContent := m.messageInput.Value()
 				if messageContent != "" {
+					toUser := m.onlineUsers[m.selectedUserIndex]
+					fromUser := discovery.GetSelfUser()
+					chat.SendChatMessage(messageContent, toUser, fromUser)
+
 					message := chat.NetworkMessage{
 						Content: messageContent,
 						From:    discovery.GetSelfUser(),
 					}
+
 					m.chatMessages = append(m.chatMessages, message)
 					m.messageInput.SetValue("")
 
