@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -182,7 +183,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 
 			case stateChat:
-				messageContent := m.messageInput.Value()
+				messageContent := strings.TrimSpace(m.messageInput.Value())
+
 				if messageContent != "" {
 					toUser := m.onlineUsers[m.selectedUserIndex]
 					fromUser := discovery.GetSelfUser()
