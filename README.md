@@ -15,26 +15,6 @@ A lightweight, terminal-first LAN chat app written in Go. Goch discovers peers o
 
 ---
 
-## Project structure 🗂️
-
-```text
-goch/
-├─ cmd/                 # CLI entrypoints (Cobra)
-├─ internal/
-│  ├─ chat/             # Chat send/receive (UDP), message model
-│  ├─ config/           # App configuration (ports, intervals)
-│  ├─ discovery/        # Presence broadcast + discovery
-│  ├─ tui/              # Bubble Tea TUI (model/view/update)
-│  │  └─ shared/        # Styles
-│  └─ utils/
-│     └─ network/       # Network helpers (broadcast detection)
-├─ Makefile             # build & test tasks
-├─ main.go              # app bootstrap
-└─ README.md            # this file
-```
-
----
-
 ## Install, build, run 🛠️
 
 Prereqs: Go 1.20+ recommended (works with Go modules), a local LAN.
@@ -144,14 +124,3 @@ Open a PR against `main` with a clear description and screenshots (if UI changes
 ## License 📄
 
 This project is licensed under the Apache License 2.0 — see [LICENSE](LICENSE).
-
----
-
-## Acknowledgments 🙏
-
-- [Bubble Tea](https://github.com/charmbracelet/bubbletea) for the TUI framework
-- [Lipgloss](https://github.com/charmbracelet/lipgloss) for terminal styling
-
-# Goch
-
-Goch is a CLI chat app that lets you find and chat with people on your local area network.
