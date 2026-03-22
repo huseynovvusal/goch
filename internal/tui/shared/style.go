@@ -4,17 +4,17 @@ import "github.com/charmbracelet/lipgloss"
 
 // Modern green-on-dark terminal aesthetic
 var (
-	PrimaryColor   = lipgloss.Color("#D27D2D")   // Earthy Orange/Brown
-	SecondaryColor = lipgloss.Color("#DEB887")   // Burlywood / Light Brown
-	AccentColor    = lipgloss.Color("#FF8C00")   // Vibrant Orange
-	BaseFgColor    = lipgloss.Color("#FDF5E6")   // Old Lace / Off-white
-	BaseBgColor    = lipgloss.Color("#1C140D")   // Very Dark Brown
-	HighlightColor = lipgloss.Color("#FFD700")   // Golden highlight
-	SuccessColor   = lipgloss.Color("#8FBC8F")   // Earthy Green
-	ErrorColor     = lipgloss.Color("#CD5C5C")   // Earthy Red
-	PromptColor    = lipgloss.Color("#FFB90F")   // Dark Goldenrod
-	DimmedColor    = lipgloss.Color("#8B5A2B")   // Muted Brown
-	BorderColor    = lipgloss.Color("#4A3020")   // Dark warm gray-brown border
+	PrimaryColor   = lipgloss.Color("#D27D2D") // Earthy Orange/Brown
+	SecondaryColor = lipgloss.Color("#DEB887") // Burlywood / Light Brown
+	AccentColor    = lipgloss.Color("#FF8C00") // Vibrant Orange
+	BaseFgColor    = lipgloss.Color("#FDF5E6") // Old Lace / Off-white
+	BaseBgColor    = lipgloss.Color("#1C140D") // Very Dark Brown
+	HighlightColor = lipgloss.Color("#FFD700") // Golden highlight
+	SuccessColor   = lipgloss.Color("#8FBC8F") // Earthy Green
+	ErrorColor     = lipgloss.Color("#CD5C5C") // Earthy Red
+	PromptColor    = lipgloss.Color("#FFB90F") // Dark Goldenrod
+	DimmedColor    = lipgloss.Color("#8B5A2B") // Muted Brown
+	BorderColor    = lipgloss.Color("#4A3020") // Dark warm gray-brown border
 )
 
 // Styles tuned for a CLI chat interface
@@ -111,7 +111,7 @@ var (
 				MarginBottom(1)
 
 	TimestampStyle = lipgloss.NewStyle().
-				Foreground(DimmedColor).
-				MarginLeft(1).
-				MarginRight(1)
+			Foreground(DimmedColor).
+			MarginLeft(1).
+			MarginRight(1)
 )

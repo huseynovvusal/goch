@@ -16,12 +16,16 @@ func (m Model) viewHub() string {
 		availHeight = 5
 	}
 	colHeight := availHeight - 2
-	if colHeight < 2 { colHeight = 2 }
+	if colHeight < 2 {
+		colHeight = 2
+	}
 
 	// --- LEFT COLUMN: Network Nodes ---
 	leftWidth := int(float64(m.width) * 0.3)
-	if leftWidth < 20 { leftWidth = 20 }
-	
+	if leftWidth < 20 {
+		leftWidth = 20
+	}
+
 	leftContent := shared.SubtitleStyle.Render("NETWORK NODES") + "\n"
 	if len(m.onlineUsers) > 0 {
 		for _, user := range m.onlineUsers {
@@ -42,17 +46,19 @@ func (m Model) viewHub() string {
 
 	// --- RIGHT COLUMN: Selected Peer Details ---
 	rightWidth := m.width - leftWidth
-	if rightWidth < 20 { rightWidth = 20 }
+	if rightWidth < 20 {
+		rightWidth = 20
+	}
 
 	rightContent := shared.SubtitleStyle.Render("SELECTED PEER DETAILS") + "\n\n"
 	if len(m.onlineUsers) > 0 {
 		selected := m.onlineUsers[m.selectedUserIndex]
-		
+
 		header := lipgloss.NewStyle().Foreground(shared.PrimaryColor).Bold(true).Render(selected.Name)
 		bio := lipgloss.NewStyle().Foreground(shared.DimmedColor).Render("Bio: No bio available")
 		ip := shared.InfoStyle.Render("IP: " + selected.IP)
 		lastSeen := shared.InfoStyle.Render("Last Seen: Just now")
-		
+
 		rightContent += lipgloss.JoinVertical(lipgloss.Left, header, bio, "\n", ip, "Port: 8989", lastSeen)
 	} else {
 		rightContent += lipgloss.NewStyle().Foreground(shared.DimmedColor).Render("No peer selected.")
@@ -60,7 +66,7 @@ func (m Model) viewHub() string {
 	rightCol := shared.RightColumnStyle.Width(rightWidth - 4).Height(colHeight).Render(rightContent)
 
 	columns := lipgloss.JoinHorizontal(lipgloss.Top, leftCol, rightCol)
-	
+
 	page := lipgloss.JoinVertical(lipgloss.Left, columns, statusBar)
 	return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, page)
 }

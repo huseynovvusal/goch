@@ -35,7 +35,7 @@ func (m Model) viewChatting() string {
 		var rows []string
 		for _, msg := range m.chatMessages {
 			isOut := msg.From.Name == m.username && msg.From.IP == discovery.GetSelfUser().IP
-			
+
 			// Handle cases where the timestamp was never initialized (e.g. dummy data / empty value)
 			ts := msg.Timestamp
 			if ts.IsZero() {
@@ -62,17 +62,17 @@ func (m Model) viewChatting() string {
 		if startIdx < 0 {
 			startIdx = 0
 		}
-		
+
 		endIdx := startIdx + viewportHeight
 		if endIdx > len(lines) {
 			endIdx = len(lines)
 		}
-		
+
 		var visibleLines []string
 		if len(lines) > 0 && startIdx < len(lines) {
 			visibleLines = lines[startIdx:endIdx]
 		}
-		
+
 		body = lipgloss.NewStyle().Height(viewportHeight).Render(strings.Join(visibleLines, "\n"))
 	}
 

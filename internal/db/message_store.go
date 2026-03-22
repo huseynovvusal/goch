@@ -20,9 +20,9 @@ func NewMessageStore() (*MessageStore, error) {
 	home, _ := os.UserHomeDir()
 	dbDir := filepath.Join(home, ".config", "goch")
 	os.MkdirAll(dbDir, 0755)
-	
+
 	dbPath := filepath.Join(dbDir, "messages.db")
-	
+
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func NewMessageStore() (*MessageStore, error) {
 			timestamp DATETIME
 		)
 	`)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (s *MessageStore) SaveMessage(ctx context.Context, msg chat.NetworkMessage,
 
 // GetMessages retrieves a block of messages ordered by timestamp sequentially
 func (s *MessageStore) GetMessages(ctx context.Context, peerIP string, limit int, offset int) ([]chat.NetworkMessage, error) {
-	// Query ordering descending to get the most recent batch based on offset, 
+	// Query ordering descending to get the most recent batch based on offset,
 	// but we must assemble it ascending for chat history rendering.
 	query := `
 		SELECT sender_ip, sender_name, content, timestamp 
@@ -85,11 +85,11 @@ func (s *MessageStore) GetMessages(ctx context.Context, peerIP string, limit int
 	for rows.Next() {
 		var ip, name, content string
 		var timestamp time.Time
-		
+
 		if err := rows.Scan(&ip, &name, &content, &timestamp); err != nil {
 			return nil, err
 		}
-		
+
 		tempMsgs = append(tempMsgs, chat.NetworkMessage{
 			Content: content,
 			From: discovery.NetworkUser{
