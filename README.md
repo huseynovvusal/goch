@@ -1,10 +1,15 @@
-# Goch 🚀
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/064fe574-c75f-4386-9715-a5935c108278" width="256">
+</p>
+
+
+# Goch
 
 A lightweight, terminal-first LAN chat app written in Go. Goch discovers peers on your local network and lets you chat in real time through a clean TUI powered by Bubble Tea.
 
 ---
 
-## Features ✨
+## Features
 
 - LAN presence discovery via UDP broadcast (default port 8787)
 - Direct user-to-user chat via UDP unicast (default port 8989)
@@ -15,7 +20,7 @@ A lightweight, terminal-first LAN chat app written in Go. Goch discovers peers o
 
 ---
 
-## Install, build, run 🛠️
+## Install, build, run
 
 Prereqs: Go 1.20+ recommended (works with Go modules), a local LAN.
 
@@ -34,21 +39,7 @@ make test
 
 ---
 
-## How it works 🧠
-
-- Discovery: each client periodically broadcasts its name on the LAN using UDP broadcast on port 8787. Peers listening on that port add/update the online user list.
-- Chat: when you select a user, messages are sent directly to that peer’s IP using UDP unicast on port 8989. Messages are JSON-encoded and include sender info (name, IP) and content.
-
-Key files:
-
-- `internal/discovery/`: `BroadcastPresence`, `ListenForPresence`, in-memory online user tracking
-- `internal/chat/`: `SendChatMessage`, `ListenForChatMessages`, `NetworkMessage` model
-- `internal/tui/`: Bubble Tea model that renders online users, handles selection, and shows a chat pane + input
-- `internal/utils/network/`: auto-detect subnet broadcast address via interface + mask math
-
----
-
-## Usage ☕
+## Usage
 
 1. Start `goch` on at least two machines on the same LAN (Wi‑Fi/Ethernet).
 2. Enter your name.
@@ -63,7 +54,7 @@ Notes:
 
 ---
 
-## Configuration ⚙️
+## Configuration
 
 Defaults live in `internal/config/config.go`.
 
@@ -77,7 +68,7 @@ Network helper:
 
 ---
 
-## Troubleshooting 🧩
+## Troubleshooting
 
 If you don’t see other users:
 
@@ -97,27 +88,9 @@ If macOS sees HP but HP doesn’t see macOS:
 
 ---
 
-## Keyboard shortcuts ⌨️
-
-- `Enter` — submit name / send message (context-sensitive)
-- `↑/↓` — navigate users
-- `q` / `Ctrl+C` — quit
-
----
-
-## Contributing 🤝
+## Contributing
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for how to set up your environment, run tests, and submit PRs.
-
-Quick start:
-
-```sh
-git checkout -b feat/awesome
-make test
-make build
-```
-
-Open a PR against `main` with a clear description and screenshots (if UI changes).
 
 ---
 
