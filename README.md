@@ -1,7 +1,6 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/064fe574-c75f-4386-9715-a5935c108278" width="256">
+  <img src="https://github.com/user-attachments/assets/74edf850-a9dc-46f1-adde-22179fa4ccb2" width="256">
 </p>
-
 
 # Goch
 
