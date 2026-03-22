@@ -4,26 +4,28 @@ import "github.com/charmbracelet/lipgloss"
 
 // Modern green-on-dark terminal aesthetic
 var (
-	BaseFgColor    = lipgloss.Color("#C5F5C9")   // soft light green for general text
-	BaseBgColor    = lipgloss.Color("#1e2d2cff") // dark greenish background
-	AccentColor    = lipgloss.Color("#00FF88")   // bright neon green accent
-	HighlightColor = lipgloss.Color("#a1ffbbff") // lime highlight for selected or active
-	SuccessColor   = lipgloss.Color("#2ECC71")   // emerald success tone
-	ErrorColor     = lipgloss.Color("#FF5C5C")   // red for errors and alerts
-	PromptColor    = lipgloss.Color("#00D4B1")   // aqua-green prompt color
-	DimmedColor    = lipgloss.Color("#4E5D4E")   // muted green-gray for subtle info
-	BorderColor    = lipgloss.Color("#2C3E2C")   // dark green-gray for borders
+	PrimaryColor   = lipgloss.Color("#D27D2D")   // Earthy Orange/Brown
+	SecondaryColor = lipgloss.Color("#DEB887")   // Burlywood / Light Brown
+	AccentColor    = lipgloss.Color("#FF8C00")   // Vibrant Orange
+	BaseFgColor    = lipgloss.Color("#FDF5E6")   // Old Lace / Off-white
+	BaseBgColor    = lipgloss.Color("#1C140D")   // Very Dark Brown
+	HighlightColor = lipgloss.Color("#FFD700")   // Golden highlight
+	SuccessColor   = lipgloss.Color("#8FBC8F")   // Earthy Green
+	ErrorColor     = lipgloss.Color("#CD5C5C")   // Earthy Red
+	PromptColor    = lipgloss.Color("#FFB90F")   // Dark Goldenrod
+	DimmedColor    = lipgloss.Color("#8B5A2B")   // Muted Brown
+	BorderColor    = lipgloss.Color("#4A3020")   // Dark warm gray-brown border
 )
 
 // Styles tuned for a CLI chat interface
 var (
 	HeaderStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(AccentColor).
-			Background(BaseBgColor).
+			Foreground(BaseBgColor).
+			Background(PrimaryColor).
 			MarginBottom(1).
 			MarginTop(1).
-			Padding(1, 2)
+			Padding(0, 1)
 
 	TitleStyle = lipgloss.NewStyle().
 			Bold(true).
@@ -31,7 +33,7 @@ var (
 			MarginBottom(1)
 
 	SubtitleStyle = lipgloss.NewStyle().
-			Foreground(AccentColor).
+			Foreground(SecondaryColor).
 			Bold(true).
 			MarginBottom(1)
 
@@ -75,10 +77,41 @@ var (
 			Foreground(BaseFgColor)
 
 	MessageFromStyle = lipgloss.NewStyle().
-				Foreground(AccentColor).
+				Foreground(SecondaryColor).
 				Bold(true)
 
 	MessageContentStyle = lipgloss.NewStyle().
 				Foreground(BaseFgColor).
 				PaddingLeft(1)
+
+	PanelStyle = lipgloss.NewStyle().
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(BorderColor).
+			Padding(0, 1)
+
+	LeftColumnStyle = PanelStyle.Copy()
+
+	RightColumnStyle = PanelStyle.Copy()
+
+	BottomSectionStyle = lipgloss.NewStyle().
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(BorderColor).
+				Padding(0, 1)
+
+	OutgoingBubbleStyle = lipgloss.NewStyle().
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(PrimaryColor).
+				Padding(0, 1).
+				MarginBottom(1)
+
+	IncomingBubbleStyle = lipgloss.NewStyle().
+				Border(lipgloss.RoundedBorder()).
+				BorderForeground(SecondaryColor).
+				Padding(0, 1).
+				MarginBottom(1)
+
+	TimestampStyle = lipgloss.NewStyle().
+				Foreground(DimmedColor).
+				MarginLeft(1).
+				MarginRight(1)
 )

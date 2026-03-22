@@ -24,7 +24,7 @@ various customization options.`,
 		chatMessages := make(chan chat.NetworkMessage)
 		go chat.ListenForChatMessages(chatMessages)
 
-		p := tea.NewProgram(tui.NewMainModel(chatMessages))
+		p := tea.NewProgram(tui.NewMainModel(chatMessages), tea.WithAltScreen())
 		mainModel, err := p.Run()
 		if err != nil {
 			fmt.Println("Error running TUI:", err)
