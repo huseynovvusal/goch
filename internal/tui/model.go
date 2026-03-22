@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/huseynovvusal/goch/internal/chat"
 	"github.com/huseynovvusal/goch/internal/config"
+	"github.com/huseynovvusal/goch/internal/db"
 	"github.com/huseynovvusal/goch/internal/discovery"
 )
 
@@ -40,32 +41,45 @@ type Model struct {
 	messageInput     textinput.Model
 	chatMessages     []chat.NetworkMessage
 	chatMessagesChan chan chat.NetworkMessage
+	msgStore         *db.MessageStore
+	chatOffset       int
+	uiScrollOffset   int
 }
 
 type UpdateUsersMsg []discovery.NetworkUser
 
 func NewMainModel(chatMessagesChan chan chat.NetworkMessage) Model {
 	messageInput := textinput.New()
-	messageInput.Placeholder = "› _"
+	messageInput.Placeholder = "Enter your message..."
 	messageInput.CharLimit = 256
 	messageInput.Width = 50
+
+	msgStore, _ := db.NewMessageStore()
 
 	m := Model{
 		messageInput:     messageInput,
 		chatMessages:     []chat.NetworkMessage{},
 		chatMessagesChan: chatMessagesChan,
-		username:         "vusal_codes",
-		bio:              "Building in Go...",
-		port:             "8080",
+		msgStore:         msgStore,
+		chatOffset:       0,
+		uiScrollOffset:   0,
+		username:         "",
+		bio:              "",
+		port:             "7070",
 	}
 
-	if dbExists() {
+	store := db.NewConfigStore()
+	if store.Exists() {
 		m.state = stateHub
-		loadDB(&m)
-		addDummyData(&m)
+		if cfg, err := store.Load(); err == nil {
+			m.username = cfg.Username
+			m.bio = cfg.Bio
+			m.port = cfg.Port
+		}
+		// addDummyData(&m)
 	} else {
 		m.state = stateOnboarding
-		theme := huh.ThemeDracula() 
+		theme := huh.ThemeDracula()
 		m.form = initForm(&m, theme)
 	}
 

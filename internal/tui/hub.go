@@ -8,7 +8,7 @@ import (
 
 func (m Model) viewHub() string {
 	// --- STATUS BAR ---
-	statusBar := shared.FooterStyle.Render("[ q: Quit | s: Settings | Enter: Start Chatting ]")
+	statusBar := shared.FooterStyle.Render("[ ^q: Quit | s: Settings | Enter: Start Chatting ]")
 
 	// Calculate remaining height for columns
 	availHeight := m.height - lipgloss.Height(statusBar)

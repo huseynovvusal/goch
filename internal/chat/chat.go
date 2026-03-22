@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 )
 
 type NetworkMessage struct {
-	Content string
-	From    discovery.NetworkUser
+	Content   string
+	From      discovery.NetworkUser
+	Timestamp time.Time `json:"timestamp"`
 }
 
 func SendChatMessage(content string, to discovery.NetworkUser, from discovery.NetworkUser) error {
@@ -26,8 +28,9 @@ func SendChatMessage(content string, to discovery.NetworkUser, from discovery.Ne
 	defer conn.Close()
 
 	messageData := NetworkMessage{
-		Content: content,
-		From:    from,
+		Content:   content,
+		From:      from,
+		Timestamp: time.Now(),
 	}
 	data, err := json.Marshal(messageData)
 	if err != nil {

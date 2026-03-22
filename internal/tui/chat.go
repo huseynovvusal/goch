@@ -5,18 +5,19 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/huseynovvusal/goch/internal/discovery"
 	"github.com/huseynovvusal/goch/internal/tui/shared"
 )
 
 func (m Model) viewChatting() string {
 	var headerTitle string
 	if len(m.onlineUsers) > 0 {
-		headerTitle = "CHATTING WITH: " + m.onlineUsers[m.selectedUserIndex].Name + " | STATUS: STABLE \U0001f4f6"
+		headerTitle = "CHATTING WITH: " + m.onlineUsers[m.selectedUserIndex].Name + " | STATUS: STABLE"
 	} else {
 		headerTitle = "CHATTING (No peer selected)"
 	}
 	header := shared.HeaderStyle.Render(headerTitle)
-	footer := shared.FooterStyle.Render("[ esc: Back to Hub | ^k: Clear History | ^l: Export Log ]")
+	footer := shared.FooterStyle.Render("[ esc: Back to Hub | ^k: Clear History ]")
 
 	var body string
 	headerHeight := lipgloss.Height(header)
@@ -33,25 +34,46 @@ func (m Model) viewChatting() string {
 	} else {
 		var rows []string
 		for _, msg := range m.chatMessages {
-			isOut := msg.From.Name == m.username
-			timestamp := shared.TimestampStyle.Render(time.Now().Format("15:04"))
+			isOut := msg.From.Name == m.username && msg.From.IP == discovery.GetSelfUser().IP
+			
+			// Handle cases where the timestamp was never initialized (e.g. dummy data / empty value)
+			ts := msg.Timestamp
+			if ts.IsZero() {
+				ts = time.Now()
+			}
+			timestamp := shared.TimestampStyle.Render(ts.Format("15:04"))
 
 			if isOut {
 				bubble := shared.OutgoingBubbleStyle.Render(msg.Content)
 				row := lipgloss.JoinHorizontal(lipgloss.Center, timestamp, bubble)
-				rows = append(rows, lipgloss.NewStyle().Width(m.width - 2).Align(lipgloss.Right).Render(row))
+				rows = append(rows, lipgloss.NewStyle().Width(m.width-2).Align(lipgloss.Right).Render(row))
 			} else {
-				bubble := shared.IncomingBubbleStyle.Render(msg.From.Name + "\n" + msg.Content)
+				senderName := lipgloss.NewStyle().Foreground(shared.HighlightColor).Render(msg.From.Name)
+				bubble := shared.IncomingBubbleStyle.Render(senderName + "\n" + msg.Content)
 				row := lipgloss.JoinHorizontal(lipgloss.Center, bubble, timestamp)
-				rows = append(rows, lipgloss.NewStyle().Width(m.width - 2).Align(lipgloss.Left).Render(row))
+				rows = append(rows, lipgloss.NewStyle().Width(m.width-2).Align(lipgloss.Left).Render(row))
 			}
 		}
 
-		startIdx := 0
-		if len(rows) > viewportHeight {
-			startIdx = len(rows) - viewportHeight
+		fullRender := strings.Join(rows, "\n")
+		lines := strings.Split(fullRender, "\n")
+
+		startIdx := len(lines) - viewportHeight - m.uiScrollOffset
+		if startIdx < 0 {
+			startIdx = 0
 		}
-		body = lipgloss.NewStyle().Height(viewportHeight).Render(strings.Join(rows[startIdx:], "\n"))
+		
+		endIdx := startIdx + viewportHeight
+		if endIdx > len(lines) {
+			endIdx = len(lines)
+		}
+		
+		var visibleLines []string
+		if len(lines) > 0 && startIdx < len(lines) {
+			visibleLines = lines[startIdx:endIdx]
+		}
+		
+		body = lipgloss.NewStyle().Height(viewportHeight).Render(strings.Join(visibleLines, "\n"))
 	}
 
 	inputView := m.messageInput.View()
