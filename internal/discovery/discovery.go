@@ -43,7 +43,7 @@ func BroadcastPresence(name string, port int) {
 	}
 
 	for {
-		conn.Write([]byte(name))
+		_, _ = conn.Write([]byte(name))
 		time.Sleep(3 * time.Second)
 	}
 }

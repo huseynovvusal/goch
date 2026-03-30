@@ -18,7 +18,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case chatMsg := <-m.chatMessagesChan:
 		m.chatMessages = append(m.chatMessages, chatMsg)
 		if m.msgStore != nil {
-			m.msgStore.SaveMessage(context.Background(), chatMsg, chatMsg.From.IP)
+			_ = m.msgStore.SaveMessage(context.Background(), chatMsg, chatMsg.From.IP)
 		}
 	default:
 	}
@@ -48,7 +48,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.port = m.form.GetString("port")
 
 			store := db.NewConfigStore()
-			store.Save(db.Config{
+			_ = store.Save(db.Config{
 				Username: m.username,
 				Bio:      m.bio,
 				Port:     m.port,
@@ -140,7 +140,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if messageContent != "" {
 					toUser := m.onlineUsers[m.selectedUserIndex]
 					fromUser := discovery.GetSelfUser()
-					chat.SendChatMessage(messageContent, toUser, fromUser)
+					_ = chat.SendChatMessage(messageContent, toUser, fromUser)
 
 					message := chat.NetworkMessage{
 						Content:   messageContent,
@@ -150,7 +150,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					m.chatMessages = append(m.chatMessages, message)
 					if m.msgStore != nil {
-						m.msgStore.SaveMessage(context.Background(), message, toUser.IP)
+						_ = m.msgStore.SaveMessage(context.Background(), message, toUser.IP)
 					}
 
 					m.uiScrollOffset = 0

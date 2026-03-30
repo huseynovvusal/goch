@@ -19,7 +19,9 @@ type MessageStore struct {
 func NewMessageStore() (*MessageStore, error) {
 	home, _ := os.UserHomeDir()
 	dbDir := filepath.Join(home, ".config", "goch")
-	os.MkdirAll(dbDir, 0755)
+	if err := os.MkdirAll(dbDir, 0755); err != nil {
+		return nil, err
+	}
 
 	dbPath := filepath.Join(dbDir, "messages.db")
 

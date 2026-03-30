@@ -89,9 +89,9 @@ var (
 			BorderForeground(BorderColor).
 			Padding(0, 1)
 
-	LeftColumnStyle = PanelStyle.Copy()
+	LeftColumnStyle = PanelStyle
 
-	RightColumnStyle = PanelStyle.Copy()
+	RightColumnStyle = PanelStyle
 
 	BottomSectionStyle = lipgloss.NewStyle().
 				Border(lipgloss.RoundedBorder()).

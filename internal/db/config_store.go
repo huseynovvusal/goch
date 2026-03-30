@@ -30,7 +30,9 @@ func (s *ConfigStore) Exists() bool {
 
 func (s *ConfigStore) Save(c Config) error {
 	path := s.dbPath()
-	os.MkdirAll(filepath.Dir(path), 0755)
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
 
 	data, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
