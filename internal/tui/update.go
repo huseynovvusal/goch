@@ -34,12 +34,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 	}
 
-	if m.state == stateOnboarding {
+	if m.state == stateOnboarding || m.state == stateSettings {
 		form, cmd := m.form.Update(msg)
 		if f, ok := form.(*huh.Form); ok {
 			m.form = f
 		}
 		if m.form.State == huh.StateCompleted {
+			pastState := m.state
 			m.state = stateHub
 
 			m.username = m.form.GetString("username")
@@ -53,12 +54,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Port:     m.port,
 			})
 
-			go discovery.BroadcastPresence(m.username, config.BROADCAST_PORT)
+			if pastState == stateOnboarding {
+				go discovery.BroadcastPresence(m.username, config.BROADCAST_PORT)
 
-			return m, tea.Batch(cmd, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
-				users := discovery.GetOnlineUsers()
-				return UpdateUsersMsg(users)
-			}))
+				return m, tea.Batch(cmd, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
+					users := discovery.GetOnlineUsers()
+					return UpdateUsersMsg(users)
+				}))
+			}
+			return m, cmd
 		}
 		return m, cmd
 	}
@@ -102,14 +106,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "s":
 			if m.state == stateHub {
-				// Settings mocked or ignored for now
+				m.state = stateSettings
+				m.form = initForm(&m, huh.ThemeDracula())
+				return m, m.form.Init()
 			}
 		case "ctrl+k":
 			if m.state == stateChatting {
 				m.chatMessages = make([]chat.NetworkMessage, 0)
 			}
 		case "esc":
-			if m.state == stateChatting {
+			if m.state == stateChatting || m.state == stateSettings {
 				m.state = stateHub
 			}
 		case "enter":

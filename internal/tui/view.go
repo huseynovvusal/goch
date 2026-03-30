@@ -13,5 +13,9 @@ func (m Model) View() string {
 		return m.viewChatting()
 	}
 
+	if m.state == stateSettings {
+		return m.viewSettings()
+	}
+
 	return ""
 }

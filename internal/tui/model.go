@@ -18,6 +18,7 @@ const (
 	stateOnboarding state = iota
 	stateHub
 	stateChatting
+	stateSettings
 )
 
 type Model struct {
