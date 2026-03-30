@@ -1,12 +1,12 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/74edf850-a9dc-46f1-adde-22179fa4ccb2" width="256">
-</p>
+# Goch
 
 [![codecov](https://codecov.io/gh/huseynovvusal/goch/branch/main/graph/badge.svg)](https://codecov.io/gh/huseynovvusal/goch)
 
-# Goch
-
 A lightweight, terminal-first LAN chat app written in Go. Goch discovers peers on your local network and lets you chat in real time through a clean TUI powered by Bubble Tea.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/bd08f4fc-c252-4bd9-b3c8-b401e8e00dc4" width="80%" maxWidth="500px" />
+</p>
 
 ---
 
