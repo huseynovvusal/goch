@@ -37,7 +37,9 @@ func TestSendChatMessage(t *testing.T) {
 	}()
 
 	buf := make([]byte, 1024)
-	conn.SetReadDeadline(time.Now().Add(2 * time.Second)) // Don't wait forever
+	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil { // Don't wait forever
+		t.Fatalf("Failed to set read deadline: %v", err)
+	}
 	n, _, err := conn.ReadFromUDP(buf)
 	if err != nil {
 		t.Fatalf("Failed to read sent message: %v", err)
