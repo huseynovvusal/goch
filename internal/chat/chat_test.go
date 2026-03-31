@@ -72,12 +72,12 @@ func TestListenForChatMessages(t *testing.T) {
 	}
 	defer conn.Close()
 
-	testmessage := NetworkMessage{
+	testMessage := NetworkMessage{
 		Content:   "Test Message",
 		From:      discovery.NetworkUser{IP: "127.0.0.1", Name: "Sender"},
 		Timestamp: time.Now(),
 	}
-	data, err := json.Marshal(testmessage)
+	data, err := json.Marshal(testMessage)
 	if err != nil {
 		t.Fatalf("Failed to marshal test message: %v", err)
 	}
