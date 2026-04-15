@@ -25,10 +25,12 @@ type Model struct {
 	state state
 
 	// Onboarding
-	form     *huh.Form
-	username string
-	bio      string
-	port     string
+	form          *huh.Form
+	username      string
+	bio           string
+	port          string
+	broadcastPort string
+	chatPort      string
 
 	// Hub
 	onlineUsers       []discovery.NetworkUser
@@ -76,6 +78,8 @@ func NewMainModel(chatMessagesChan chan chat.NetworkMessage) Model {
 			m.username = cfg.Username
 			m.bio = cfg.Bio
 			m.port = cfg.Port
+			m.broadcastPort = cfg.BroadCastPort
+			m.chatPort = cfg.ChatPort
 		}
 		// addDummyData(&m)
 	} else {

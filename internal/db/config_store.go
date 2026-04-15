@@ -7,9 +7,11 @@ import (
 )
 
 type Config struct {
-	Username string `json:"username"`
-	Bio      string `json:"bio"`
-	Port     string `json:"port"`
+	Username      string `json:"username"`
+	Bio           string `json:"bio"`
+	Port          string `json:"port"`
+	BroadCastPort string `json:"broadcast_port"`
+	ChatPort      string `json:"chat_port"`
 }
 
 type ConfigStore struct{}
