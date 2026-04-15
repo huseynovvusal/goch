@@ -30,12 +30,19 @@ func TestSendChatMessage(t *testing.T) {
 	to := discovery.NetworkUser{IP: "127.0.0.1", Name: "Receiver"}
 	content := "Hello, World!"
 
+	errCh := make(chan error, 1)
 	go func() {
-		err := chat.SendChatMessage(content, to, from, db.DefaultChatPort)
+		errCh <- chat.SendChatMessage(content, to, from, db.DefaultChatPort)
+	}()
+
+	select {
+	case err := <-errCh:
 		if err != nil {
 			t.Fatalf("Failed to send chat message: %v", err)
 		}
-	}()
+	case <-time.After(2 * time.Second):
+		t.Fatalf("Timed out sending chat message")
+	}
 
 	buf := make([]byte, 1024)
 	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil { // Don't wait forever
