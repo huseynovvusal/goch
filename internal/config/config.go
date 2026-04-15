@@ -1,8 +1,6 @@
 package config
 
 var (
-	BROADCAST_PORT                = 8787
-	CHAT_PORT                     = 8989
 	BROADCAST_INTERVAL            = 5  // in seconds
 	USER_TIMEOUT                  = 15 // in seconds
 	DISCOVERY_BUFFER_SIZE         = 1024

@@ -10,8 +10,24 @@ type Config struct {
 	Username      string `json:"username"`
 	Bio           string `json:"bio"`
 	Port          string `json:"port"`
-	BroadCastPort string `json:"broadcast_port"`
-	ChatPort      string `json:"chat_port"`
+	BroadCastPort int    `json:"broadcast_port"`
+	ChatPort      int    `json:"chat_port"`
+}
+
+const (
+	DefaultBroadcastPort = 8787
+	DefaultChatPort      = 8989
+)
+
+func (c Config) WithDefaults() Config {
+	if c.BroadCastPort == 0 {
+		c.BroadCastPort = DefaultBroadcastPort
+	}
+	if c.ChatPort == 0 {
+		c.ChatPort = DefaultChatPort
+	}
+
+	return c
 }
 
 type ConfigStore struct{}

@@ -6,7 +6,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/huseynovvusal/goch/internal/config"
 	"github.com/huseynovvusal/goch/internal/discovery"
 )
 
@@ -16,10 +15,10 @@ type NetworkMessage struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-func SendChatMessage(content string, to discovery.NetworkUser, from discovery.NetworkUser) error {
+func SendChatMessage(content string, to discovery.NetworkUser, from discovery.NetworkUser, chatPort int) error {
 	addr := &net.UDPAddr{
 		IP:   net.ParseIP(to.IP),
-		Port: config.CHAT_PORT,
+		Port: chatPort,
 	}
 	conn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
@@ -42,10 +41,10 @@ func SendChatMessage(content string, to discovery.NetworkUser, from discovery.Ne
 	return err
 }
 
-func ListenForChatMessages(messages chan<- NetworkMessage) {
+func ListenForChatMessages(messages chan<- NetworkMessage, chatPort int) {
 	addr := net.UDPAddr{
 		IP:   net.IPv4zero,
-		Port: config.CHAT_PORT,
+		Port: chatPort,
 	}
 	conn, err := net.ListenUDP("udp", &addr)
 	if err != nil {

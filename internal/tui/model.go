@@ -29,8 +29,8 @@ type Model struct {
 	username      string
 	bio           string
 	port          string
-	broadcastPort string
-	chatPort      string
+	broadcastPort int
+	chatPort      int
 
 	// Hub
 	onlineUsers       []discovery.NetworkUser
@@ -69,12 +69,15 @@ func NewMainModel(chatMessagesChan chan chat.NetworkMessage) Model {
 		username:         "",
 		bio:              "",
 		port:             "7070",
+		broadcastPort:    db.DefaultBroadcastPort,
+		chatPort:         db.DefaultChatPort,
 	}
 
 	store := db.NewConfigStore()
 	if store.Exists() {
 		m.state = stateHub
 		if cfg, err := store.Load(); err == nil {
+			cfg = cfg.WithDefaults()
 			m.username = cfg.Username
 			m.bio = cfg.Bio
 			m.port = cfg.Port
@@ -98,7 +101,7 @@ func (m Model) Init() tea.Cmd {
 	if m.state == stateOnboarding {
 		cmds = append(cmds, m.form.Init())
 	} else if m.state == stateHub {
-		go discovery.BroadcastPresence(m.username, config.BROADCAST_PORT)
+		go discovery.BroadcastPresence(m.username, m.broadcastPort)
 		cmds = append(cmds, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 			users := discovery.GetOnlineUsers()
 			return UpdateUsersMsg(users)
