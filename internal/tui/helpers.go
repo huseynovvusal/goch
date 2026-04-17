@@ -8,6 +8,8 @@ import (
 )
 
 func initForm(m *Model, theme *huh.Theme) *huh.Form {
+	portStr := strconv.Itoa(m.broadcastPort)
+	chatPortStr := strconv.Itoa(m.chatPort)
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -34,6 +36,26 @@ func initForm(m *Model, theme *huh.Theme) *huh.Form {
 				Key("port").
 				Title("Port").
 				Value(&m.port).
+				Validate(func(s string) error {
+					if _, err := strconv.Atoi(s); err != nil {
+						return errors.New("must be an integer")
+					}
+					return nil
+				}),
+			huh.NewInput().
+				Key("broadcast_port").
+				Title("Broadcast Port").
+				Value(&portStr).
+				Validate(func(s string) error {
+					if _, err := strconv.Atoi(s); err != nil {
+						return errors.New("must be an integer")
+					}
+					return nil
+				}),
+			huh.NewInput().
+				Key("chat_port").
+				Title("Chat Port").
+				Value(&chatPortStr).
 				Validate(func(s string) error {
 					if _, err := strconv.Atoi(s); err != nil {
 						return errors.New("must be an integer")

@@ -46,16 +46,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.username = m.form.GetString("username")
 			m.bio = m.form.GetString("bio")
 			m.port = m.form.GetString("port")
+			m.broadcastPort = m.form.GetInt("broadcast_port")
+			m.chatPort = m.form.GetInt("chat_port")
 
 			store := db.NewConfigStore()
 			_ = store.Save(db.Config{
-				Username: m.username,
-				Bio:      m.bio,
-				Port:     m.port,
+				Username:      m.username,
+				Bio:           m.bio,
+				Port:          m.port,
+				BroadCastPort: m.broadcastPort,
+				ChatPort:      m.chatPort,
 			})
 
 			if pastState == stateOnboarding {
-				go discovery.BroadcastPresence(m.username, config.BROADCAST_PORT)
+				go discovery.BroadcastPresence(m.username, m.broadcastPort)
 
 				return m, tea.Batch(cmd, tea.Tick(time.Duration(config.ONLINE_USERS_REFRESH_INTERVAL)*time.Second, func(t time.Time) tea.Msg {
 					users := discovery.GetOnlineUsers()
@@ -140,7 +144,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if messageContent != "" {
 					toUser := m.onlineUsers[m.selectedUserIndex]
 					fromUser := discovery.GetSelfUser()
-					_ = chat.SendChatMessage(messageContent, toUser, fromUser)
+					_ = chat.SendChatMessage(messageContent, toUser, fromUser, m.chatPort)
 
 					message := chat.NetworkMessage{
 						Content:   messageContent,

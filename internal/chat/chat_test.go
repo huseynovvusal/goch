@@ -1,4 +1,4 @@
-package chat
+package chat_test
 
 import (
 	"encoding/json"
@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/huseynovvusal/goch/internal/config"
+	"github.com/huseynovvusal/goch/internal/chat"
+	"github.com/huseynovvusal/goch/internal/db"
 	"github.com/huseynovvusal/goch/internal/discovery"
 )
 
@@ -16,7 +17,7 @@ func TestSendChatMessage(t *testing.T) {
 	// and verify that the content and sender information are correct.
 	addr := &net.UDPAddr{
 		IP:   net.ParseIP("127.0.0.1"),
-		Port: config.CHAT_PORT,
+		Port: db.DefaultChatPort,
 	}
 
 	conn, err := net.ListenUDP("udp", addr)
@@ -29,12 +30,19 @@ func TestSendChatMessage(t *testing.T) {
 	to := discovery.NetworkUser{IP: "127.0.0.1", Name: "Receiver"}
 	content := "Hello, World!"
 
+	errCh := make(chan error, 1)
 	go func() {
-		err := SendChatMessage(content, to, from)
+		errCh <- chat.SendChatMessage(content, to, from, db.DefaultChatPort)
+	}()
+
+	select {
+	case err := <-errCh:
 		if err != nil {
 			t.Fatalf("Failed to send chat message: %v", err)
 		}
-	}()
+	case <-time.After(2 * time.Second):
+		t.Fatalf("Timed out sending chat message")
+	}
 
 	buf := make([]byte, 1024)
 	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil { // Don't wait forever
@@ -45,7 +53,7 @@ func TestSendChatMessage(t *testing.T) {
 		t.Fatalf("Failed to read sent message: %v", err)
 	}
 
-	var received NetworkMessage
+	var received chat.NetworkMessage
 	err = json.Unmarshal(buf[:n], &received)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal received data: %v", err)
@@ -57,13 +65,13 @@ func TestSendChatMessage(t *testing.T) {
 }
 
 func TestListenForChatMessages(t *testing.T) {
-	messages := make(chan NetworkMessage, 1)
+	messages := make(chan chat.NetworkMessage, 1)
 
-	go ListenForChatMessages(messages)
+	go chat.ListenForChatMessages(messages, db.DefaultChatPort)
 
 	srvrAddr := &net.UDPAddr{
 		IP:   net.ParseIP("127.0.0.1"),
-		Port: config.CHAT_PORT,
+		Port: db.DefaultChatPort,
 	}
 
 	conn, err := net.DialUDP("udp", nil, srvrAddr)
@@ -72,7 +80,7 @@ func TestListenForChatMessages(t *testing.T) {
 	}
 	defer conn.Close()
 
-	testMessage := NetworkMessage{
+	testMessage := chat.NetworkMessage{
 		Content:   "Test Message",
 		From:      discovery.NetworkUser{IP: "127.0.0.1", Name: "Sender"},
 		Timestamp: time.Now(),
